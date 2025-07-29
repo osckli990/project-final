@@ -1,0 +1,20 @@
+/* base theme (default) */
+:root {
+  --color-primary: #687cb0; /* Soft blue */
+  --color-secondary: #ae9dec; /* Light purple */
+  --color-background: #fffcfa; /* warm white */
+  --color-text: #2c383c; /* Dark grey */
+  --color-alt-text: #fdfbf6; /* off-white for contrast */
+  --color-textentry: #fefefe; /* Light grey for text entry */
+}
+
+/* dark theme */
+.theme-dark {
+  --color-primary: #352e4b;
+  --color-secondary: #131b27;
+  --color-background: #0b0d12;
+  --color-textentry: #282828;
+  --color-text: #acadac;
+}
+
+/* other themes */
