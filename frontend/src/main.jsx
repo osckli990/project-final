@@ -4,7 +4,6 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import App from "./App.jsx";
-import Login from "./pages/Login.jsx"; // optional extra route
 import LoginSection from "./sections/LoginSection.jsx";
 import ChatSection from "./sections/ChatSection.jsx";
 import HistorySection from "./sections/HistorySection.jsx";
