@@ -1,62 +1,78 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { ClerkProvider } from "@clerk/clerk-react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Link } from "react-router-dom";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+} from "@clerk/clerk-react";
 
-import App from "./App.jsx";
-import LoginSection from "./sections/LoginSection.jsx";
-import ChatSection from "./sections/ChatSection.jsx";
-import HistorySection from "./sections/HistorySection.jsx";
-import ResourceSection from "./sections/ResourceSection.jsx";
+const App = ({ children }) => {
+  return (
+    <div
+      className="min-h-screen"
+      style={{
+        background: "var(--color-background)",
+        color: "var(--color-text)",
+      }}
+    >
+      <header className="max-w-6xl mx-auto p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link to="/chat" className="text-sm sm:text-base hover:underline">
+            Home
+          </Link>
+          <Link to="/chat" aria-label="Home">
+            <img
+              src="/assets/icon-64.png"
+              alt=""
+              width="32"
+              height="32"
+              className="rounded-lg"
+              aria-hidden="true"
+            />
+          </Link>
+        </div>
 
-import "./Themes.css";
-import "./App.css";
+        <nav className="text-sm flex items-center gap-6">
+          <Link to="/chat" className="hover:underline">
+            Home
+          </Link>
+          <Link to="/mood" className="hover:underline">
+            History
+          </Link>
+          <Link to="/resources" className="hover:underline">
+            Resources
+          </Link>
 
-const router = createBrowserRouter([
-  // Landing shows Login
-  {
-    path: "/",
-    element: (
-      <App>
-        <LoginSection />
-      </App>
-    ),
-  },
-  // Home = Chat
-  {
-    path: "/chat",
-    element: (
-      <App>
-        <ChatSection />
-      </App>
-    ),
-  },
-  // History
-  {
-    path: "/mood",
-    element: (
-      <App>
-        <HistorySection />
-      </App>
-    ),
-  },
-  // Resources
-  {
-    path: "/resources",
-    element: (
-      <App>
-        <ResourceSection />
-      </App>
-    ),
-  },
-]);
+          <SignedOut>
+            <div className="flex items-center gap-3">
+              <SignInButton mode="modal">
+                <span className="hover:underline cursor-pointer">Log in</span>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <span
+                  className="px-3 py-1 rounded-lg text-white"
+                  style={{ background: "var(--color-primary)" }}
+                >
+                  Sign up
+                </span>
+              </SignUpButton>
+            </div>
+          </SignedOut>
 
-const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
+        </nav>
+      </header>
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
-      <RouterProvider router={router} />
-    </ClerkProvider>
-  </React.StrictMode>
-);
+      <main id="main">{children}</main>
+
+      <footer className="max-w-6xl mx-auto p-4 text-xs opacity-80">
+        This is a supportive, non-clinical tool.
+      </footer>
+    </div>
+  );
+};
+
+export default App;

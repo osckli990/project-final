@@ -2,13 +2,70 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+
+    <!-- Styles -->
     <link rel="stylesheet" href="/src/App.css" />
     <link rel="stylesheet" href="/src/Themes.css" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+
+    <!-- Favicons (PNG for best compatibility) -->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="64x64"
+      href="/assets/icon-64.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/assets/icon-192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="/assets/icon-512.png"
+    />
+    <link rel="apple-touch-icon" href="/assets/icon-192.png" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Technigo React Vite Boiler Plate</title>
+    <title>Oscars Project — Mindful Chat</title>
+
+    <!-- Basic SEO -->
+    <meta
+      name="description"
+      content="A gentle, supportive chat to help you reflect on your thoughts and feelings. Sign in to start a private conversation."
+    />
+    <meta name="theme-color" content="#ae9dec" />
+
+    <!-- Open Graph (Facebook, LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="Mindful Chat — AI-powered mental health companion"
+    />
+    <meta
+      property="og:description"
+      content="Supportive, non-clinical AI chat with Clerk sign-in and private message history."
+    />
+    <!-- You can keep using your mockup as the preview image -->
+    <meta property="og:image" content="/assets/mockups/chat-mock.png" />
+    <!-- Replace with your real URL after deploy -->
+    <meta property="og:url" content="https://example.com/" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Mindful Chat — AI-powered mental health companion"
+    />
+    <meta
+      name="twitter:description"
+      content="Supportive, non-clinical AI chat with Clerk sign-in and private message history."
+    />
+    <meta name="twitter:image" content="/assets/mockups/chat-mock.png" />
   </head>
-  <body>
+  <body style="background: var(--color-background); color: var(--color-text)">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
