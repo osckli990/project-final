@@ -1,20 +1,25 @@
-import { useState } from "react";
-import { useSignIn, SignUpButton } from "@clerk/clerk-react";
+import { useEffect, useState } from "react";
+import { useAuth, useSignIn, SignUpButton } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 
-// - On success -> /chat
-export default function Login() {
+const Login = () => {
   const navigate = useNavigate();
   const { isLoaded, signIn, setActive } = useSignIn();
+  const { isSignedIn } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
+  // If already signed in, go to /chat
+  useEffect(() => {
+    if (isSignedIn) navigate("/chat");
+  }, [isSignedIn, navigate]);
+
   if (!isLoaded) return null;
 
-  async function onSubmit(e) {
+  const onSubmit = async (e) => {
     e.preventDefault();
     if (busy) return;
     setBusy(true);
@@ -30,11 +35,9 @@ export default function Login() {
         await setActive({ session: res.createdSessionId });
         navigate("/chat");
       } else {
-        // Other steps like 2FA could land here
         setError("Additional verification required. Please continue the flow.");
       }
     } catch (err) {
-      // Collect Clerk error messages nicely
       const first =
         err?.errors?.[0]?.longMessage ||
         err?.errors?.[0]?.message ||
@@ -43,9 +46,9 @@ export default function Login() {
     } finally {
       setBusy(false);
     }
-  }
+  };
 
-  async function onForgot(e) {
+  const onForgot = async (e) => {
     e.preventDefault();
     setError("");
     if (!email) {
@@ -57,7 +60,6 @@ export default function Login() {
         strategy: "reset_password_email_code",
         identifier: email,
       });
-      // Clerk will email a code; you can build a /reset route later
       setError("Password reset email sent. Check your inbox.");
     } catch (err) {
       const first =
@@ -65,13 +67,23 @@ export default function Login() {
         "Could not start password reset. Please try again.";
       setError(first);
     }
-  }
+  };
 
   return (
-    <main className="min-h-screen bg-[#fff8f2] flex items-center justify-center p-4">
+    <main
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{
+        background: "var(--color-background)",
+        color: "var(--color-text)",
+      }}
+    >
       <section
-        className="w-full max-w-md bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 p-6"
+        className="w-full max-w-md rounded-2xl shadow-sm ring-1 p-6"
         aria-label="Login form"
+        style={{
+          background: "#fff",
+          borderColor: "rgba(44,56,60,0.1)",
+        }}
       >
         {/* top label (mockup shows “placeholder”) */}
         <p className="text-center text-xl font-semibold mb-2">placeholder</p>
@@ -79,7 +91,10 @@ export default function Login() {
         <h1 className="text-center text-3xl font-bold tracking-tight">
           Log in
         </h1>
-        <p className="text-center text-slate-600 mt-1 mb-6">
+        <p
+          className="text-center mt-1 mb-6"
+          style={{ color: "var(--color-text)" }}
+        >
           An account is required for AI recognition.
         </p>
 
@@ -96,7 +111,11 @@ export default function Login() {
               placeholder="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 px-3 py-3 outline-none focus:ring-2 focus:ring-violet-500"
+              className="w-full rounded-xl px-3 py-3 border outline-none focus:ring-2"
+              style={{
+                background: "var(--color-textentry)",
+                borderColor: "rgba(44,56,60,0.2)",
+              }}
               required
             />
           </div>
@@ -112,21 +131,26 @@ export default function Login() {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 px-3 py-3 pr-20 outline-none focus:ring-2 focus:ring-violet-500"
+              className="w-full rounded-xl px-3 py-3 pr-20 border outline-none focus:ring-2"
+              style={{
+                background: "var(--color-textentry)",
+                borderColor: "rgba(44,56,60,0.2)",
+              }}
               required
               minLength={8}
             />
             <button
               onClick={onForgot}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-600 hover:underline"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-sm hover:underline"
               type="button"
+              style={{ color: "var(--color-text)" }}
             >
               Forgot?
             </button>
           </div>
 
           {error && (
-            <p role="alert" className="text-sm text-red-600">
+            <p role="alert" className="text-sm" style={{ color: "#b00020" }}>
               {error}
             </p>
           )}
@@ -134,13 +158,17 @@ export default function Login() {
           <button
             type="submit"
             disabled={busy}
-            className="w-full rounded-xl bg-black text-white py-3 font-medium disabled:opacity-60"
+            className="w-full rounded-xl py-3 font-medium disabled:opacity-60"
+            style={{ background: "var(--color-primary)", color: "#fff" }}
           >
             {busy ? "Signing in…" : "Continue"}
           </button>
         </form>
 
-        <p className="text-center text-sm text-slate-700 mt-6">
+        <p
+          className="text-center text-sm mt-6"
+          style={{ color: "var(--color-text)" }}
+        >
           Don’t have an account?{" "}
           <SignUpButton mode="modal">
             <span className="font-medium underline cursor-pointer">
@@ -151,4 +179,6 @@ export default function Login() {
       </section>
     </main>
   );
-}
+};
+
+export default Login;

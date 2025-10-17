@@ -3,11 +3,6 @@ import axios from "axios";
 import { useAuth } from "@clerk/clerk-react";
 import { useChatStore } from "../store/useChatStore";
 
-/**
- * InputCard: posts a message to your backend (/chat) and appends
- * both the saved user message and assistant reply to the chat store.
- * Colors follow CSS variables; shapes mirror the mockup.
- */
 export default function InputCard({ className = "" }) {
   const { getToken } = useAuth();
   const { messages, setMessages, addMessage } = useChatStore();
@@ -41,7 +36,7 @@ export default function InputCard({ className = "" }) {
 
       const { userMessage, assistantMessage } = res.data;
       setMessages([...messages, userMessage, assistantMessage]);
-    } catch (e) {
+    } catch {
       setError("Couldn’t send message. Please try again.");
     } finally {
       setBusy(false);

@@ -4,20 +4,20 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import App from "./App.jsx";
-import Landing from "./pages/Landing.jsx";
 import Login from "./pages/Login.jsx";
-import Mood from "./pages/Mood.jsx";
+import LoginSection from "./sections/LoginSection.jsx";
 import ChatSection from "./sections/ChatSection.jsx";
 
 import "./Themes.css";
 import "./App.css";
+import HistorySection from "./sections/HistorySection.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
       <App>
-        <Landing />
+        <LoginSection />
       </App>
     ),
   },
@@ -41,7 +41,7 @@ const router = createBrowserRouter([
     path: "/mood",
     element: (
       <App>
-        <Mood />
+        <HistorySection />
       </App>
     ),
   },
