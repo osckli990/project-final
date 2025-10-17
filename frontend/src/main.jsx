@@ -7,7 +7,7 @@ import App from "./App.jsx";
 import LoginSection from "./sections/LoginSection.jsx";
 import ChatSection from "./sections/ChatSection.jsx";
 import HistorySection from "./sections/HistorySection.jsx";
-import ResourcesSection from "./sections/ResourceSection.jsx";
+import ResourcesSection from "./sections/ResourcesSection.jsx";
 
 import "./Themes.css";
 import "./App.css";
