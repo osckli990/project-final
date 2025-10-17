@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth, useSignIn, SignUpButton } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 
-const Login = () => {
+const LoginSection = () => {
   const navigate = useNavigate();
   const { isLoaded, signIn, setActive } = useSignIn();
   const { isSignedIn } = useAuth();
@@ -24,7 +24,7 @@ const Login = () => {
     if (busy) return;
     setBusy(true);
     setError("");
-
+    //test
     try {
       const res = await signIn.create({
         identifier: email,
@@ -181,4 +181,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginSection;
