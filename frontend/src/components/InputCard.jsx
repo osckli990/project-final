@@ -1,47 +1,47 @@
-import { useState } from "react";
-import axios from "axios";
+import { useState, useRef } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { useChatStore } from "../store/useChatStore";
+import { API, withAuth } from "../API";
 
-export default function InputCard({ className = "" }) {
+const InputCard = ({ className = "" }) => {
   const { getToken } = useAuth();
   const { messages, setMessages, addMessage } = useChatStore();
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const textareaRef = useRef(null);
 
-  async function send() {
+  const send = async () => {
     if (!draft.trim() || busy) return;
     setBusy(true);
     setError("");
 
     try {
-      const token = await getToken();
-      if (!token) {
-        setError("Please log in to send a message.");
-        setBusy(false);
-        return;
-      }
+      const cfg = await withAuth(getToken);
 
-      // optimistic user bubble
       const optimistic = { role: "user", content: draft };
       addMessage(optimistic);
       setDraft("");
 
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/chat`,
-        { content: optimistic.content },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
+      const res = await API.post("/chat", { content: optimistic.content }, cfg);
       const { userMessage, assistantMessage } = res.data;
       setMessages([...messages, userMessage, assistantMessage]);
+
+      // return focus for a11y
+      textareaRef.current?.focus();
     } catch {
       setError("Couldn’t send message. Please try again.");
     } finally {
       setBusy(false);
     }
-  }
+  };
+
+  const onKeyDown = (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+      e.preventDefault();
+      void send();
+    }
+  };
 
   return (
     <div className={className}>
@@ -51,9 +51,11 @@ export default function InputCard({ className = "" }) {
         </label>
         <textarea
           id="composer"
+          ref={textareaRef}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder="Share what’s on your mind…"
+          onKeyDown={onKeyDown}
+          placeholder="Share what’s on your mind… (Ctrl/Cmd + Enter to send)"
           className="flex-1 rounded-xl px-3 py-3 min-h-14 border outline-none focus:ring-2"
           style={{
             background: "var(--color-textentry)",
@@ -61,12 +63,14 @@ export default function InputCard({ className = "" }) {
             color: "var(--color-text)",
             boxShadow: "inset 0 1px 0 rgba(0,0,0,0.02)",
           }}
+          aria-label="Message input"
         />
         <button
           onClick={send}
           disabled={busy}
           className="rounded-xl px-5 py-3 text-white font-medium disabled:opacity-60"
           style={{ background: "var(--color-primary)" }}
+          aria-label="Send message"
         >
           {busy ? "Sending…" : "Send"}
         </button>
@@ -79,4 +83,6 @@ export default function InputCard({ className = "" }) {
       )}
     </div>
   );
-}
+};
+
+export default InputCard;

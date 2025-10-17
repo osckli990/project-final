@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import axios from "axios";
 import {
   SignedIn,
   SignedOut,
@@ -11,6 +10,7 @@ import { media } from "../Breakpoints";
 import { useChatStore } from "../store/useChatStore";
 import InputCard from "../components/InputCard";
 import ResponseCard from "../components/ResponseCard";
+import { API, withAuth } from "../API";
 
 const ChatSection = () => {
   const { getToken } = useAuth();
@@ -20,17 +20,11 @@ const ChatSection = () => {
   useEffect(() => {
     (async () => {
       try {
-        const token = await getToken();
-        if (!token) return;
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/messages`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const cfg = await withAuth(getToken);
+        const res = await API.get("/messages", cfg);
         setMessages(res.data);
       } catch {
-        /* ignore when signed out */
+        /* signed out or network error */
       }
     })();
   }, [getToken, setMessages]);
@@ -43,13 +37,17 @@ const ChatSection = () => {
 
   return (
     <div
-      className="min-h-[calc(100vh-120px)]" // account for header/footer
+      className="min-h-[calc(100vh-120px)]"
       style={{
         background: "var(--color-background)",
         color: "var(--color-text)",
       }}
     >
-      <main className="max-w-6xl mx-auto px-4 pb-16">
+      <a href="#main" className="sr-only focus:not-sr-only underline p-2">
+        Skip to content
+      </a>
+
+      <main id="main" className="max-w-6xl mx-auto px-4 pb-16">
         <section className="grid gap-8">
           <div>
             <h1 className="font-bold tracking-tight mb-2 title-clamp">
@@ -67,7 +65,11 @@ const ChatSection = () => {
                 boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
               }}
             >
-              <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-1">
+              <div
+                className="space-y-3 max-h-[50vh] overflow-y-auto pr-1"
+                aria-live="polite"
+                aria-atomic="false"
+              >
                 {!hasMessages && (
                   <ResponseCard
                     role="assistant"
@@ -95,6 +97,7 @@ const ChatSection = () => {
                       color: "var(--color-text)",
                     }}
                     placeholder="Please log in to start chatting…"
+                    aria-label="Message input (disabled, please log in)"
                   />
                   <SignInButton mode="modal">
                     <button
