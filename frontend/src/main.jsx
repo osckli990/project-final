@@ -2,13 +2,15 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
 import App from "./App.jsx";
 import Landing from "./pages/Landing.jsx";
-import Chat from "./pages/Chat.jsx";
+import Login from "./pages/Login.jsx";
 import Mood from "./pages/Mood.jsx";
+import ChatSection from "./sections/ChatSection.jsx";
+
 import "./Themes.css";
 import "./App.css";
-import Login from "./pages/Login.jsx";
 
 const router = createBrowserRouter([
   {
@@ -31,7 +33,7 @@ const router = createBrowserRouter([
     path: "/chat",
     element: (
       <App>
-        <Chat />
+        <ChatSection />
       </App>
     ),
   },
@@ -44,6 +46,7 @@ const router = createBrowserRouter([
     ),
   },
 ]);
+
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 ReactDOM.createRoot(document.getElementById("root")).render(
