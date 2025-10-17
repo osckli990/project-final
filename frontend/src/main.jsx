@@ -7,7 +7,7 @@ import App from "./App.jsx";
 import LoginSection from "./sections/LoginSection.jsx";
 import ChatSection from "./sections/ChatSection.jsx";
 import HistorySection from "./sections/HistorySection.jsx";
-import ResourceSection from "./sections/ResourceSection.jsx";
+import ResourcesSection from "./sections/ResourceSection.jsx";
 
 import "./Themes.css";
 import "./App.css";
@@ -58,7 +58,7 @@ const router = createBrowserRouter([
     path: "/resources",
     element: (
       <App>
-        <ResourceSection />
+        <ResourcesSection />
       </App>
     ),
   },
