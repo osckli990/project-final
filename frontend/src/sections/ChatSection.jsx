@@ -11,7 +11,6 @@ import { useChatStore } from "../store/useChatStore";
 import InputCard from "../components/InputCard";
 import ResponseCard from "../components/ResponseCard";
 import { API, withAuth } from "../API";
-import { useRef, useEffect } from "react";
 import { useUpdateEffect } from "../hooks/useUpdateEffect";
 
 const ChatSection = () => {
@@ -19,10 +18,12 @@ const ChatSection = () => {
   const { messages, setMessages } = useChatStore();
   const endRef = useRef(null);
 
+  // Smooth scroll only when messages update (custom hook)
   useUpdateEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Initial fetch
   useEffect(() => {
     (async () => {
       try {

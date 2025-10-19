@@ -8,6 +8,11 @@ A responsive React (Vite + Tailwind) app with Clerk auth and Zustand state offer
 
 Describe how you approached to problem, and what tools and techniques you used to solve it. How did you plan? What technologies did you use? If you had more time, what would be next?
 
+Problem: people feeling alone and have noone to talk to.
+Solution: creating an AI to chat with in a neutral and safe space.
+Tools: React, Vite, Clerk, Tailwind, Zustand, custom hooks, node/express, openAI, Atlas, MongoDB, Netlify, Render
+Next: linking to health resources nearby, language support, dark theme, etc.
+
 ## View it live
 
 Netlify: https://project-final-oscar.netlify.app/
