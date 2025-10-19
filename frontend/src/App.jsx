@@ -1,4 +1,4 @@
-import SiteHeader from "./components/Header";
+import SiteHeader from "./components/SiteHeader";
 
 const App = ({ children, showHeader = true }) => {
   return (
