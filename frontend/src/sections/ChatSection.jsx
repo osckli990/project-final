@@ -11,11 +11,17 @@ import { useChatStore } from "../store/useChatStore";
 import InputCard from "../components/InputCard";
 import ResponseCard from "../components/ResponseCard";
 import { API, withAuth } from "../API";
+import { useRef, useEffect } from "react";
+import { useUpdateEffect } from "../hooks/useUpdateEffect";
 
 const ChatSection = () => {
   const { getToken } = useAuth();
   const { messages, setMessages } = useChatStore();
   const endRef = useRef(null);
+
+  useUpdateEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   useEffect(() => {
     (async () => {
@@ -28,10 +34,6 @@ const ChatSection = () => {
       }
     })();
   }, [getToken, setMessages]);
-
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
 
   const hasMessages = (messages?.length ?? 0) > 0;
 

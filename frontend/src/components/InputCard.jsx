@@ -37,10 +37,11 @@ const InputCard = ({ className = "" }) => {
   };
 
   const onKeyDown = (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       void send();
     }
+    // Shift+Enter → normal newline (do nothing)
   };
 
   return (

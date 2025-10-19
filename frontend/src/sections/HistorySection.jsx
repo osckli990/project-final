@@ -1,15 +1,22 @@
 import { useState } from "react";
 import { useMoodStore } from "../store/useMoodStore";
+import { useAuth } from "@clerk/clerk-react";
+import { API, withAuth } from "../API";
 import { media } from "../Breakpoints";
 
 const HistorySection = () => {
   const { entries, addEntry } = useMoodStore();
+  const { getToken } = useAuth();
   const [mood, setMood] = useState("🙂");
   const [note, setNote] = useState("");
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    addEntry(mood, note);
+    addEntry(mood, note); // keep local UX snappy
+    try {
+      const cfg = await withAuth(getToken);
+      await API.post("/moods", { mood, note }, cfg); // persist
+    } catch {}
     setNote("");
   };
 

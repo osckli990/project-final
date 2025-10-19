@@ -13,27 +13,17 @@ import "./Themes.css";
 import "./App.css";
 
 const router = createBrowserRouter([
-  // Landing = Login
+  // Landing = Login (NO HEADER)
   {
     path: "/",
     element: (
-      <App>
+      <App showHeader={false}>
         <LoginSection />
       </App>
     ),
   },
 
-  // Optional dedicated /login (kept for convenience)
-  {
-    path: "/login",
-    element: (
-      <App>
-        <LoginSection />
-      </App>
-    ),
-  },
-
-  // Home = Chat
+  // Home = Chat (header visible)
   {
     path: "/chat",
     element: (
@@ -43,7 +33,7 @@ const router = createBrowserRouter([
     ),
   },
 
-  // History
+  // History (header visible)
   {
     path: "/mood",
     element: (
@@ -53,7 +43,7 @@ const router = createBrowserRouter([
     ),
   },
 
-  // Resources
+  // Resources (header visible)
   {
     path: "/resources",
     element: (
