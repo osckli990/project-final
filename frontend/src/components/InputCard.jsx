@@ -56,7 +56,7 @@ const InputCard = ({ className = "" }) => {
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={onKeyDown}
-          placeholder="Share what’s on your mind… (Ctrl/Cmd + Enter to send)"
+          placeholder="Share what’s on your mind…"
           className="flex-1 rounded-xl px-3 py-3 min-h-14 border outline-none focus:ring-2"
           style={{
             background: "var(--color-textentry)",

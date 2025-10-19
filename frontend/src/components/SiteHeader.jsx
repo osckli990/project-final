@@ -11,9 +11,6 @@ const SiteHeader = () => {
   return (
     <header className="max-w-6xl mx-auto p-4 flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <Link to="/chat" className="text-sm sm:text-base hover:underline">
-          Home
-        </Link>
         <Link to="/chat" aria-label="Home">
           <img
             src="/assets/icon-64.png"
