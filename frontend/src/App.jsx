@@ -1,4 +1,4 @@
-import { Header } from "./components";
+import SiteHeader from "./components/Header";
 
 const App = ({ children, showHeader = true }) => {
   return (
@@ -9,7 +9,7 @@ const App = ({ children, showHeader = true }) => {
         color: "var(--color-text)",
       }}
     >
-      {showHeader && <Header />}
+      {showHeader && <SiteHeader />}
 
       <main id="main">{children}</main>
 
