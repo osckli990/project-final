@@ -1,8 +1,8 @@
 # Final Project
 
-Replace this readme with your own information about your project.
+Avoiding building similair projects to bootcamp, create something new using the tools we have learned, while alowing us to deep-dive into them or related tools.
 
-Start by briefly describing the assignment in a sentence or two. Keep it short and to the point.
+A responsive React (Vite + Tailwind) app with Clerk auth and Zustand state offers a Clerk-hosted Login landing page, an AI Chat home, and a Mood History page with chat-bubble UI. A Node/Express + MongoDB backend stores per-user messages and moods, calls OpenAI gpt-4o-mini, and tailors replies using recent chat plus mood history. The frontend is deployed on Netlify, the backend on Render, with CORS limited to site origins and secrets kept in environment variables.
 
 ## The problem
 
@@ -10,4 +10,12 @@ Describe how you approached to problem, and what tools and techniques you used t
 
 ## View it live
 
-Every project should be deployed somewhere. Be sure to include the link to the deployed project so that the viewer can click around and see what it's all about.
+Netlify: https://project-final-oscar.netlify.app/
+Render: https://project-final-itk1.onrender.com/
+
+GET / → “Mindful Chat API” (ping)
+GET /health → { ok: true, ts }å
+GET /messages → chat history (auth required)
+POST /chat → send a message; returns { userMessage, assistantMessage } (auth required)
+GET /moods → list recent moods (auth required)
+POST /moods → add mood { mood, note? } (auth required)
