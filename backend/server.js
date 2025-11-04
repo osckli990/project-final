@@ -7,6 +7,11 @@ import OpenAI from "openai";
 
 dotenv.config();
 
+/**
+ * SYSTEM PROMPT
+ * Guides the assistant's tone, scope, and guardrails.
+ * This stays constant for each chat completion call.
+ */
 const SYSTEM_PROMPT = `
 You are a supportive, non-clinical mental health companion.
 Primary goals: help users reflect, regulate emotions, and find next gentle steps.
@@ -42,12 +47,38 @@ REFUSALS
 - If asked to do something unsafe or out of scope, briefly refuse and redirect to safer alternatives.
 `.trim();
 
+/**
+ * CRISIS DETECTION
+ * Simple regex to catch explicit crisis language.
+ * If matched, we return a prewritten crisis reply (no model call).
+ */
 const CRISIS_RE =
   /\b(kill myself|end my life|suicide|can't go on|hurt myself|harm myself|kill (him|her|them)|plan to (hurt|kill))\b/i;
+
+/**
+ * CRISIS REPLY
+ * Short, compassionate, action-oriented. Returned immediately when CRISIS_RE matches.
+ * NOTE: Adjust resources to your deployment region as needed.
+ */
+const CRISIS_REPLY = `
+I'm really glad you told me. Your safety matters.
+If you feel in immediate danger, please contact your local emergency number now.
+
+You can also reach out to:
+• International: https://findahelpline.com
+• Sweden (example): 112 (emergency), or Mind Självmordslinjen 90101 / chat via mind.se
+
+If you can, consider telling someone you trust what’s going on. I can stay with you here while you get support.
+`.trim();
+
+/* ----------------------------- DATABASE SETUP ----------------------------- */
 
 const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/final-project";
 await mongoose.connect(mongoUrl);
 
+/**
+ * Message model: stores per-user chat history (assistant + user turns).
+ */
 const MessageSchema = new mongoose.Schema({
   userId: { type: String, index: true },
   role: { type: String, enum: ["user", "assistant"], required: true },
@@ -57,14 +88,34 @@ const MessageSchema = new mongoose.Schema({
 const Message =
   mongoose.models.Message || mongoose.model("Message", MessageSchema);
 
+/**
+ * Mood model: lightweight mood tracking with optional note.
+ * Used to build a short mood history summary that conditions the AI.
+ */
+const MoodSchema = new mongoose.Schema({
+  userId: { type: String, index: true },
+  mood: { type: String, required: true }, // e.g., 😀🙂😐😕😢 (or any short token/string)
+  note: { type: String, default: "" },
+  date: { type: Date, default: Date.now },
+});
+const Mood = mongoose.models.Mood || mongoose.model("Mood", MoodSchema);
+
+/* -------------------------------- APP SETUP -------------------------------- */
+
 const app = express();
 const origins = process.env.ORIGIN
   ? process.env.ORIGIN.split(",")
   : ["http://localhost:5173"];
+
 app.use(cors({ origin: origins, credentials: true }));
 app.use(express.json());
 
-// 👇 Provide both keys explicitly
+/**
+ * Clerk auth middleware.
+ * We pass both keys explicitly to avoid misconfiguration in some setups.
+ * - publishableKey: safe for the client.
+ * - secretKey: required on the server for verifying sessions.
+ */
 app.use(
   clerkMiddleware({
     publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
@@ -72,11 +123,19 @@ app.use(
   })
 );
 
+/* ------------------------------- OPENAI CLIENT ------------------------------ */
+
 const oai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+/* --------------------------------- ROUTES ---------------------------------- */
 
 app.get("/health", (_req, res) => res.json({ ok: true, ts: Date.now() }));
 app.get("/", (_req, res) => res.send("Mindful Chat API"));
 
+/**
+ * ensureAuth: gatekeeper used by all protected endpoints.
+ * Returns the userId or sends 401 and returns null.
+ */
 const ensureAuth = (req, res) => {
   const { userId } = getAuth(req);
   if (!userId) {
@@ -86,6 +145,12 @@ const ensureAuth = (req, res) => {
   return userId;
 };
 
+/* ----------------------------- MESSAGES ENDPOINTS ----------------------------- */
+
+/**
+ * Returns up to 500 messages for the authenticated user in chronological order.
+ * Used by the UI to display the full thread.
+ */
 app.get("/messages", async (req, res) => {
   const userId = ensureAuth(req, res);
   if (!userId) return;
@@ -93,16 +158,11 @@ app.get("/messages", async (req, res) => {
   res.json(msgs);
 });
 
-// ➕ model (put near MessageSchema)
-const MoodSchema = new mongoose.Schema({
-  userId: { type: String, index: true },
-  mood: { type: String, required: true }, // 😀🙂😐😕😢
-  note: { type: String, default: "" },
-  date: { type: Date, default: Date.now },
-});
-const Mood = mongoose.models.Mood || mongoose.model("Mood", MoodSchema);
+/* ------------------------------- MOOD ENDPOINTS ------------------------------ */
 
-// ➕ moods endpoints
+/**
+ * Get recent moods (newest first). Useful for charts or trend views in the client.
+ */
 app.get("/moods", async (req, res) => {
   const userId = ensureAuth(req, res);
   if (!userId) return;
@@ -110,6 +170,9 @@ app.get("/moods", async (req, res) => {
   res.json(items);
 });
 
+/**
+ * Create a new mood entry. Body: { mood: string, note?: string }
+ */
 app.post("/moods", async (req, res) => {
   const userId = ensureAuth(req, res);
   if (!userId) return;
@@ -119,16 +182,33 @@ app.post("/moods", async (req, res) => {
   res.status(201).json(doc);
 });
 
+/* --------------------------------- CHAT FLOW -------------------------------- */
+
+/**
+ * Chat endpoint:
+ * 1) Auth check and input validation.
+ * 2) Save the user's message.
+ * 3) Load prior chat history (last 20) and mood history (last 10).
+ * 4) If crisis regex matches, short-circuit with CRISIS_REPLY (no model call).
+ * 5) Otherwise call OpenAI with:
+ *    - SYSTEM_PROMPT
+ *    - a system message containing the mood summary
+ *    - prior chat history + current user message
+ * 6) Save and return the assistant reply.
+ */
 app.post("/chat", async (req, res) => {
   const userId = ensureAuth(req, res);
   if (!userId) return;
+
   try {
     const { content } = req.body;
     if (!content?.trim())
       return res.status(400).json({ error: "content is required" });
 
+    // Store the new user message immediately so the transcript is consistent.
     const userMessage = await Message.create({ userId, role: "user", content });
 
+    // Load recent conversation history (most recent 20) and present in chronological order.
     const recentMsgs = await Message.find({ userId })
       .sort({ createdAt: -1 })
       .limit(20)
@@ -137,6 +217,8 @@ app.post("/chat", async (req, res) => {
       .reverse()
       .map((m) => ({ role: m.role, content: m.content }));
 
+    // Load last 10 moods and build a one-line-per-entry summary.
+    // Example line: "11/03/2025: 🙂 – felt calmer after walk"
     const recentMoods = await Mood.find({ userId })
       .sort({ date: -1 })
       .limit(10)
@@ -150,6 +232,7 @@ app.post("/chat", async (req, res) => {
       )
       .join("\n");
 
+    // CRISIS SHORT-CIRCUIT: return static crisis guidance if we detect high-risk phrases.
     if (CRISIS_RE.test(content)) {
       const assistantMessage = await Message.create({
         userId,
@@ -162,6 +245,7 @@ app.post("/chat", async (req, res) => {
       });
     }
 
+    // Call OpenAI with strong system prompt + mood history as additional system context.
     const completion = await oai.chat.completions.create({
       model: "gpt-4o-mini",
       temperature: 0.2,
@@ -178,9 +262,12 @@ app.post("/chat", async (req, res) => {
       ],
     });
 
+    // Fallback reply keeps the experience graceful if the API returns no choices.
     const reply =
       completion.choices?.[0]?.message?.content ||
       "I'm here with you. How are you feeling right now?";
+
+    // Persist the assistant's answer into the transcript.
     const assistantMessage = await Message.create({
       userId,
       role: "assistant",
@@ -193,6 +280,8 @@ app.post("/chat", async (req, res) => {
     res.status(500).json({ error: "Failed to generate reply" });
   }
 });
+
+/* --------------------------------- SERVER ---------------------------------- */
 
 const port = process.env.PORT || 8080;
 app.listen(port, () =>
